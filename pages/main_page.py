@@ -3,13 +3,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 import allure
+from selenium.common.exceptions import TimeoutException
 
 
 class MainPage:
     search_input = (By.ID, "app-search")
     search_button = (By.CSS_SELECTOR, ".search-form__button-search")
     suggestion = (By.CSS_SELECTOR, ".suggests-list-item__link")
-    search_error = (By.CSS_SELECTOR, ".stub-basic__title")
+    search_error = (By.CSS_SELECTOR, ".search-title__head")
 
     def __init__(self, driver):
         self.driver = driver
@@ -41,9 +42,9 @@ class MainPage:
     @allure.step("Проверить отображение подсказок")
     def check_suggestions_visibility(self) -> None:
         """Проверяет отображение подсказок"""
-        WebDriverWait(self.driver, 10).until(
+        return WebDriverWait(self.driver, 10).until(
             EC.visibility_of_element_located(self.suggestion)
-        )
+        ).is_displayed
 
     @allure.step("Проверть наличие сообщения об ошибке")
     def get_search_error(self) -> str:
@@ -60,3 +61,12 @@ class MainPage:
             EC.element_to_be_clickable(self.search_input)
         )
         search_input.send_keys(search_query, Keys.ENTER)
+
+        try:
+            WebDriverWait(self.driver, 5).until(
+                EC.visibility_of_element_located(self.search_error)
+            )
+        except TimeoutException:
+            WebDriverWait(self.driver, 5).until(
+                        EC.element_to_be_clickable(self.search_button)
+            ).click()
