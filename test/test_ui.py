@@ -31,8 +31,8 @@ def test_get_suggestions(driver) -> None:
 def test_invalid_input(driver) -> None:
     """Проверяет отсутсвие результатов при невалидном запросе."""
     main_page = MainPage(driver)
-
-    main_page.search_by_enter("()+=")
+    with allure.step("Ввести невалидный запрос и запустить поиск"):
+        main_page.search_by_enter("()+=")
 
     with allure.step("Проверить, что появлется текст ошибки"):
         assert "не принес результатов" in main_page.get_search_error()
